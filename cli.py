@@ -4,7 +4,12 @@ Command Line Interface for Rhabdomyolysis Aki Agent.
 import argparse
 import csv
 import json
+import os
 import sys
+
+# Set default audit key for CLI if not already set
+os.environ.setdefault("AUDIT_SECRET_KEY", "cli-default-audit-key-change-in-production-2026")
+
 from agents.models import SystemTaskPayload
 from agents.supervisor import SystemSupervisor
 from agents.base import AuditLogger

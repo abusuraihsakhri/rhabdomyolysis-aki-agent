@@ -3,8 +3,13 @@ Automated Pytest Test Suite for Rhabdomyolysis Aki Agent.
 Domain: Nephrology & Dialysis Systems
 Standard: KDIGO / KDOQI Clinical Practice Guidelines
 """
+import os
 import sys
 from pathlib import Path
+
+# Set required environment variable before importing agents
+os.environ.setdefault("AUDIT_SECRET_KEY", "test-audit-secret-key-for-pytest-2026")
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pytest
@@ -63,3 +68,50 @@ def test_supervisor_consensus_and_audit():
     assert main(["audit", "--task-id", "CLI-TEST-01"]) == 0
     assert main(["chat", "Explain", "specifications"]) == 0
     assert main(["verify-audit"]) == 0
+
+
+def test_input_validation_rejects_nan():
+    """NaN metric values must be rejected by validation."""
+    import math
+    with pytest.raises(ValueError, match="finite"):
+        SystemTaskPayload(task_id="T-NAN", target_identifier="K-01", primary_metric=math.nan)
+
+
+def test_input_validation_rejects_infinity():
+    """Infinite metric values must be rejected by validation."""
+    import math
+    with pytest.raises(ValueError, match="finite"):
+        SystemTaskPayload(task_id="T-INF", target_identifier="K-01", secondary_metric=math.inf)
+
+
+def test_input_validation_rejects_extreme_values():
+    """Values exceeding magnitude bounds must be rejected."""
+    with pytest.raises(ValueError, match="magnitude"):
+        SystemTaskPayload(task_id="T-BIG", target_identifier="K-01", primary_metric=2_000_000.0)
+
+
+def test_input_validation_rejects_empty_task_id():
+    """Empty task_id must be rejected."""
+    with pytest.raises(ValueError):
+        SystemTaskPayload(task_id="", target_identifier="K-01", primary_metric=10.0)
+
+
+def test_audit_trail_requires_secret_key():
+    """AuditTrail must reject initialization without a secret key."""
+    import os
+    from agents.base import AuditTrail
+
+    original = os.environ.pop("AUDIT_SECRET_KEY", None)
+    try:
+        with pytest.raises(RuntimeError, match="AUDIT_SECRET_KEY"):
+            AuditTrail()
+    finally:
+        if original:
+            os.environ["AUDIT_SECRET_KEY"] = original
+
+
+def test_audit_trail_rejects_short_key():
+    """AuditTrail must reject short secret keys."""
+    from agents.base import AuditTrail
+    with pytest.raises(ValueError, match="at least 16"):
+        AuditTrail(secret_key="short")
