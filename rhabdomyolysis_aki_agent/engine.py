@@ -27,8 +27,8 @@ class ClinicalDomainEngine:
     def evaluate_secondary_kinetics(cls, value: float, is_stat: bool) -> Optional[Dict[str, Any]]:
         if value > cls.SECONDARY_ALERT_LIMIT or is_stat:
             return {
-                "title": "STAT Kinetic Escalation Triggered",
-                "finding": f"Kinetic parameter ({value:.2f}) with STAT={is_stat} requires prioritized supervision.",
+                "title": "Example Priority Flag Triggered",
+                "finding": f"Unitless example parameter ({value:.2f}) and manual priority flag={is_stat}.",
                 "recommendation": "Manually review this example flag; independent clinical assessment is required.",
             }
         return None
