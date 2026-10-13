@@ -1,128 +1,68 @@
 # Rhabdomyolysis AKI Agent
 
-> **Domain:** Nephrology & Renal Replacement Protocols  
-> **Reference Guidelines & Standards:** `KDIGO & KDOQI Clinical Guidelines`
+A Python and browser-based **software demonstration** of generic rule checks, CSV processing, a FastAPI service, and an in-memory signed event log. The repository also retains earlier compatibility implementations.
 
-<div align="center">
+**Clinical scope:** The numeric checks are illustrative and unitless. This software **does not implement a validated McMahon score, KDIGO AKI classifier, CK clearance model, or rhabdomyolysis treatment algorithm**. The project name describes its intended domain, not clinical validation. Never use the demo for diagnosis, triage, prescriptions, or decisions involving patients.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+## Browser demonstration
 
-</div>
+Open [web/index.html](web/index.html) locally in a browser. It is a standalone, mobile-responsive JavaScript demonstration of the enterprise path's illustrative 25/12 thresholds, a manual priority flag, and status keyword checks. It requires no Python, API, third-party assets, or network calls. It can export an example JSON result. Only use synthetic input; no inputs are uploaded or intentionally persisted. The [GitHub Pages workflow](.github/workflows/pages.yml) publishes this directory when Pages is configured for GitHub Actions; a live URL is not claimed until deployment has been verified.
 
----
+## Python setup
 
-## 📖 What It Does
-
-**Rhabdomyolysis AKI Agent** is an advanced analytical and computational platform implementing CK Clearance Kinetics & McMahon RRT Risk Stratifier.
-
----
-
-## ⚙️ Key Capabilities & Algorithmic Modules
-
-### 🔬 Core Algorithmic & Evaluation Engines
-
-- **`Severity`** — dedicated module for severity evaluation and state verification.
-- **`DomainKnowledgeRegistry`**: Enterprise domain rules, guideline matrices, and evidence benchmarks.
-- **`AgentAlert`** — dedicated module for agent alert evaluation and state verification.
-- **`CKClearanceKineticsAgent`**: Specialized Sub-Agent 1 for rhabdomyolysis-aki-agent
-- **`McMahonRiskScorerAgent`**: Specialized Sub-Agent 2 for rhabdomyolysis-aki-agent
-- **`UrineAlkalinizationAdvisorAgent`**: Specialized Sub-Agent 3 for rhabdomyolysis-aki-agent
-
----
-
-## 💻 CLI Quickstart & Usage
-
-### 1. Guided Interactive Mode
-```bash
-python cli.py
-```
-
-### 2. Direct Parameterized Evaluation
-```bash
-python cli.py --task-id <value> --target <value> --primary <value> --secondary <value>
-```
-
-### Parameter Reference
-- `--task-id`: Specifies input measurement or parameter value.
-- `--target`: Specifies input measurement or parameter value.
-- `--primary`: Specifies input measurement or parameter value.
-- `--secondary`: Specifies input measurement or parameter value.
-- `--critical`: Specifies input measurement or parameter value.
-- `--status`: Specifies input measurement or parameter value.
-- `--input`: Specifies input measurement or parameter value.
-- `--output`: Specifies input measurement or parameter value.
-
-### Input Data Schema
-
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `case_id` | Parameter / observation metric | Required |
-| `patient_synthetic_id` | Parameter / observation metric | Required |
-| `metric_primary` | Parameter / observation metric | Required |
-| `metric_secondary` | Parameter / observation metric | Required |
-| `is_stat` | Parameter / observation metric | Required |
-| `status_flag` | Parameter / observation metric | Required |
-
----
-
-## 🛡️ Security & Enterprise Architecture
-
-* **Zero-PHI Outbound Interceptor:** Active regex inspection blocking SSNs, MRNs, phone numbers, emails, DOB, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition. Requires `AUDIT_SECRET_KEY` environment variable (min 16 chars).
-* **Input Validation:** Pydantic validators reject NaN, Infinity, and out-of-range metric values; string fields are length-bounded and control-character sanitized.
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
-* **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
-* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
-
-### Environment Setup
-
-Copy `.env.example` to `.env` and configure:
+Python 3.10–3.12 is tested in CI (package metadata permits Python 3.9+). From a fresh checkout:
 
 ```bash
-cp .env.example .env
-# Edit .env and set a secure AUDIT_SECRET_KEY
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[api,test]"
+export AUDIT_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
 ```
 
-Generate a secure audit key:
+On Windows, activate the environment with `.venv\Scripts\activate` and set `AUDIT_SECRET_KEY` through your shell or process environment.
+
+The signing key **must be supplied explicitly**; no production key is embedded. The `.env.example` file is a template, but the Python CLI does not automatically load `.env`.
+
+## CLI
 
 ```bash
-python -c "import secrets; print(secrets.token_hex(32))"
+python cli.py audit --task-id DEMO-01 --target SYNTH-01 --primary 29 --secondary 13
+python cli.py chat "status"
+python cli.py batch --input sample.csv --output results.csv
+python cli.py verify-audit
+python simulator.py 100
 ```
 
----
+The main CLI is `cli.py` (the enterprise demonstration using Pydantic models). Batch CSV accepts either the enterprise `primary_metric` / `is_critical_flag` fields or the supplied sample's `metric_primary` / `is_stat` equivalents, including textual `True` and `False`. Batch results and the audit log exist only in memory during execution; a separate `verify-audit` invocation starts a new process and therefore cannot verify a prior process's audit chain.
 
-## 🧪 Testing & Verification
+For compatibility, `rhabdo_guard.py` and `python -m rhabdomyolysis_aki_agent.cli` retain older, distinct example rule paths. Their fields and thresholds differ; they are not interchangeable with the main CLI.
 
-Run the automated test suite:
+## REST API
 
 ```bash
-pytest -v
+python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
-Tests cover:
-- PHI guard enforcement (SSN, MRN, phone, email, DOB detection)
-- Specialized worker evaluation (QC, Safety, Protocol Conformance)
-- Supervisor consensus and HMAC audit trail integrity
-- Input validation (NaN, Infinity, out-of-range rejection)
-- Audit trail secret key enforcement
-- CLI commands (audit, chat, verify-audit)
+The enterprise FastAPI service exposes `GET /health`, JSON counters at `GET /metrics`, `POST /api/audit`, and `POST /api/chat` (deterministic mock text only; **no clinical reasoning**). `GET /api/audit/logs` requires the `X-Audit-Key` header matching `AUDIT_SECRET_KEY`. OpenAPI documentation is at `/docs`.
 
-Execute high-throughput batch simulation benchmarks:
+Do not expose the API publicly without independent authentication, rate limiting, access control, and a privacy/security review. The built-in identifier detection uses a limited set of regular expressions, **not** comprehensive PHI detection or a HIPAA compliance certification. Audit logs are HMAC-SHA256 chained **in memory**; they are not durable, multi-process logs.
+
+## Tests and Docker
 
 ```bash
-python simulator.py 1000
+python -m pytest -v
+docker compose up --build
 ```
 
----
+For Docker Compose, copy `.env.example` to `.env`, replace the signing key placeholder with a unique randomly generated key, and keep the file private. The Docker image installs the declared runtime dependencies and serves FastAPI on port 8000. CI runs the Python suite and compiles the modules on Python 3.10–3.12.
 
-## 🐳 Container Deployment
+## Technical scope
 
-```bash
-docker build -t rhabdomyolysis-aki-agent .
-docker run -p 8000:8000 rhabdomyolysis-aki-agent
-```
+- Python, Pydantic v2, FastAPI, Uvicorn, pytest; dependency-free HTML/CSS/JavaScript frontend.
+- Generic threshold workers, synthetic-case output, CSV batch support, and regex-based identifier checks.
+- Signed audit records detect record/chain tampering while the process remains running. No persistent database, clinical outcome validation, real external language-model integration, or EHR/FHIR integration is implemented.
+- Browser demo supports current Chrome/Edge/Firefox/Safari with modern JavaScript; it does not execute Python or send data to a server.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
