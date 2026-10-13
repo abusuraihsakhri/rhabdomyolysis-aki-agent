@@ -57,7 +57,7 @@ def api_chat(req: ChatRequest):
 
 @app.get("/api/audit/logs")
 def api_audit_logs(x_audit_key: str = Header(default="", alias="X-Audit-Key")):
-    key = os.environ.get("AUDIT_SECRET_KEY", "")
+    key = os.environ.get("AUDIT_READ_TOKEN", "")
     if not key or not hmac.compare_digest(x_audit_key, key):
         raise HTTPException(status_code=403, detail="Audit key required")
     return {"audit_trail": AuditLogger.get_trail(), "verified": AuditLogger.verify_integrity()}
