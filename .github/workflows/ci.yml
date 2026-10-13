@@ -36,11 +36,14 @@ jobs:
       run: |
         pytest -v
 
-    - name: Security SAST & Zero-PHI Audit
+    - name: Audit signature smoke check
       run: |
         python -c "
-        from agents.base import PHIGuard, AuditLogger
-        import pytest
-        assert AuditLogger.verify_integrity() is True
-        print('Security & Zero-PHI Audit Passed!')
+        from agents.base import AuditTrail
+        trail = AuditTrail()
+        trail.log('ci', 'test', 'VERIFY', {'status': 'test'})
+        assert trail.verify_integrity()
+        trail.logs[0]['actor'] = 'tampered'
+        assert not trail.verify_integrity()
+        print('Audit-signature smoke check passed')
         "
