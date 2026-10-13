@@ -54,7 +54,7 @@ python -m pytest -v
 docker compose up --build
 ```
 
-For Docker Compose, copy `.env.example` to `.env`, replace the signing key placeholder with a unique randomly generated key, and keep the file private. The Docker image installs the declared runtime dependencies and serves FastAPI on port 8000. CI runs the Python suite and compiles the modules on Python 3.10–3.12.
+For Docker Compose, copy `.env.example` to `.env`, populate the empty signing-key value with a unique randomly generated key, and keep the file private. The Docker image installs the declared runtime dependencies and serves FastAPI on port 8000. CI runs the Python suite and compiles the modules on Python 3.10–3.12.
 
 ## Technical scope
 
