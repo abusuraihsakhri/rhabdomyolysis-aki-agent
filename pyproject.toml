@@ -29,3 +29,9 @@ rhabdomyolysis-aki-engine = "rhabdomyolysis_aki_agent.cli:main"
 [project.urls]
 Homepage = "https://github.com/abusuraihsakhri/rhabdomyolysis-aki-agent"
 Repository = "https://github.com/abusuraihsakhri/rhabdomyolysis-aki-agent.git"
+
+[tool.setuptools]
+py-modules = ["cli", "enrichment", "rhabdo_guard", "simulator"]
+
+[tool.setuptools.packages.find]
+include = ["agents*", "rhabdomyolysis_aki_agent*"]
