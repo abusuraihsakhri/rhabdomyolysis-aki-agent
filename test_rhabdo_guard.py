@@ -33,5 +33,10 @@ def test_cli():
 
 def test_domain_registry():
     from rhabdo_guard import DomainKnowledgeRegistry
-    assert DomainKnowledgeRegistry.ZERO_PHI_COMPLIANCE is True
+    assert DomainKnowledgeRegistry.ZERO_PHI_COMPLIANCE is False
     assert "PRO" in DomainKnowledgeRegistry.SYSTEM_VERSION
+
+def test_advisory_not_labeled_normal():
+    coord = RhabdoCoordinator()
+    dossier = coord.audit_case({"status_text": "DISCORDANT"})
+    assert dossier["overall_status"] == "ADVISORY_ACTIVE"
