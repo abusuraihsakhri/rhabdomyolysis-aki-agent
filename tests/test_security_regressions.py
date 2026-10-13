@@ -69,11 +69,12 @@ def test_batch_reads_legacy_example_schema_correctly(tmp_path, monkeypatch):
 
 def test_audit_logs_are_not_public(monkeypatch):
     monkeypatch.setenv("AUDIT_SECRET_KEY", "regression-test-key-of-sufficient-length")
+    monkeypatch.setenv("AUDIT_READ_TOKEN", "separate-regression-log-reader-token")
     client = TestClient(app)
     assert client.get("/health").status_code == 200
     assert client.get("/api/audit/logs").status_code == 403
     assert client.get("/api/audit/logs", headers={"X-Audit-Key": "wrong"}).status_code == 403
-    assert client.get("/api/audit/logs", headers={"X-Audit-Key": os.environ["AUDIT_SECRET_KEY"]}).status_code == 200
+    assert client.get("/api/audit/logs", headers={"X-Audit-Key": os.environ["AUDIT_READ_TOKEN"]}).status_code == 200
 
 
 def test_api_rejects_identifier_pattern_in_nested_attributes(monkeypatch):
