@@ -27,7 +27,7 @@ def main(argv=None):
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Audit
-    p_audit = subparsers.add_parser("audit", help="Run single case clinical audit")
+    p_audit = subparsers.add_parser("audit", help="Run illustrative example check")
     p_audit.add_argument("--case-id", default="CASE-2026-001")
     p_audit.add_argument("--primary", type=float, default=26.2)
     p_audit.add_argument("--secondary", type=float, default=12.5)
@@ -62,7 +62,7 @@ def main(argv=None):
         dossier = coordinator.process_case(case)
         print("=" * 80)
         print(f"  RHABDOGUARD: SERUM CREATINE KINASE (CK) KINETICS & MYOGLOBINURIA AKI AGENT")
-        print(f"  Domain: Nephrology / Critical Care | Standard: Peer-Reviewed Clinical Guidelines")
+        print(f"  Domain: Nephrology / Critical Care | Standard: Illustrative rules only (not clinically validated)")
         print(f"  Case: {dossier['case_id']} | Status: [{dossier['overall_status']}] | Total Alerts: {dossier['total_alerts']}")
         print("=" * 80)
         for a in dossier["alerts"]:
