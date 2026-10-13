@@ -24,7 +24,7 @@ api = ["fastapi>=0.110,<1", "uvicorn>=0.30,<1"]
 test = ["pytest>=8,<10", "httpx>=0.27,<1"]
 
 [project.scripts]
-rhabdomyolysis-aki-engine = "rhabdomyolysis_aki_agent.cli:main"
+rhabdomyolysis-aki-engine = "cli:main"
 
 [project.urls]
 Homepage = "https://github.com/abusuraihsakhri/rhabdomyolysis-aki-agent"
