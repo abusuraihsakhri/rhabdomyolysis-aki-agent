@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent
-Calculates McMahon rhabdomyolysis risk score for renal replacement therapy and manages target urine output (>200-300 mL/h) and alkalinization.
+Illustrative generic threshold rules only; does not calculate a validated McMahon or AKI risk score.
 
 Domain: Nephrology / Critical Care
 Author: Dr. Abu Suraih Sakhri
@@ -33,15 +33,15 @@ class Severity(str, Enum):
 class DomainKnowledgeRegistry:
     """Enterprise domain rules, guideline matrices, and evidence benchmarks."""
     SYSTEM_VERSION = "2.0.0-PRO-CLINICAL"
-    ZERO_PHI_COMPLIANCE = True
-    HIPAA_SAFE_HARBOR = "ACTIVE_ON_PREMISES"
+    ZERO_PHI_COMPLIANCE = False
+    HIPAA_SAFE_HARBOR = "NOT_VERIFIED"
 
     @staticmethod
     def audit_security_and_integrity(payload: Dict[str, Any]) -> List[str]:
         warnings = []
         for key in payload.keys():
             if any(phi_keyword in key.lower() for phi_keyword in ["patient_name", "ssn", "mrn_raw", "dob_raw"]):
-                warnings.append(f"PHI_DEFENSE_TRIGGERED: Direct identifier '{key}' masked to synthetic token.")
+                warnings.append(f"Potential sensitive key '{key}' detected; no automatic masking performed.")
         return warnings
 
 class AgentAlert:
@@ -143,7 +143,7 @@ class RhabdoCoordinator:
         critical_count = sum(1 for a in all_alerts if a.severity == Severity.CRITICAL)
         warning_count = sum(1 for a in all_alerts if a.severity == Severity.WARNING)
 
-        overall_status = "CRITICAL_ACTION_REQUIRED" if critical_count > 0 else ("WARNING_ACTIVE" if warning_count > 0 else "CONCORDANT_NORMAL")
+        overall_status = "CRITICAL_ACTION_REQUIRED" if critical_count > 0 else ("WARNING_ACTIVE" if warning_count > 0 else ("ADVISORY_ACTIVE" if all_alerts else "CONCORDANT_NORMAL"))
 
         dossier = {
             "system": "rhabdomyolysis-aki-agent",
@@ -166,7 +166,7 @@ class RhabdoCoordinator:
         if "summary" in q or "status" in q:
             return f"RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent currently tracking {len(self.case_registry)} cases in local air-gapped memory."
         elif "guidelines" in q or "protocol" in q:
-            return "All sub-agents operate under validated consensus clinical algorithms and CAP/CLSI/NCCN/WHO standards."
+            return "This legacy implementation uses illustrative thresholds; no clinical guideline validation is established."
         else:
             return f"RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent executive agent online. Continuous supervisory monitoring active across all domain parameters."
 
@@ -181,7 +181,7 @@ def create_app():
 
         app = FastAPI(
             title="RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent",
-            description="Calculates McMahon rhabdomyolysis risk score for renal replacement therapy and manages target urine output (>200-300 mL/h) and alkalinization.",
+            description="Illustrative generic threshold rules only; does not calculate a validated McMahon or AKI risk score.",
             version="1.0.0",
         )
 
