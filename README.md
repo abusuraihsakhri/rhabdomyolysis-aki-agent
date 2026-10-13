@@ -33,7 +33,7 @@ python cli.py verify-audit
 python simulator.py 100
 ```
 
-The main CLI is `cli.py` (the enterprise demonstration using Pydantic models). Batch CSV accepts either the enterprise `primary_metric` / `is_critical_flag` fields or the supplied sample's `metric_primary` / `is_stat` equivalents, including textual `True` and `False`. Batch results and the audit log exist only in memory during execution; a separate `verify-audit` invocation starts a new process and therefore cannot verify a prior process's audit chain.
+The main CLI is `cli.py` (the enterprise demonstration using Pydantic models). Batch CSV accepts either the enterprise `primary_metric` / `is_critical_flag` fields or the supplied sample's `metric_primary` / `is_stat` equivalents, including textual `True` and `False`. Audit records exist only in memory during execution; batch results are written to the specified CSV file; a separate `verify-audit` invocation starts a new process and therefore cannot verify a prior process's audit chain.
 
 For compatibility, `rhabdo_guard.py` and `python -m rhabdomyolysis_aki_agent.cli` retain older, distinct example rule paths. Their fields and thresholds differ; they are not interchangeable with the main CLI.
 
@@ -43,7 +43,7 @@ For compatibility, `rhabdo_guard.py` and `python -m rhabdomyolysis_aki_agent.cli
 python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
-The enterprise FastAPI service exposes `GET /health`, JSON counters at `GET /metrics`, `POST /api/audit`, and `POST /api/chat` (deterministic mock text only; **no clinical reasoning**). `GET /api/audit/logs` requires the `X-Audit-Key` header matching `AUDIT_SECRET_KEY`. OpenAPI documentation is at `/docs`.
+The enterprise FastAPI service exposes `GET /health`, JSON counters at `GET /metrics`, `POST /api/audit`, and `POST /api/chat` (deterministic mock text only; **no clinical reasoning**). `GET /api/audit/logs` is disabled unless a separate `AUDIT_READ_TOKEN` is configured; requests must send that token through the `X-Audit-Key` header. OpenAPI documentation is at `/docs`.
 
 Do not expose the API publicly without independent authentication, rate limiting, access control, and a privacy/security review. The built-in identifier detection uses a limited set of regular expressions, **not** comprehensive PHI detection or a HIPAA compliance certification. Audit logs are HMAC-SHA256 chained **in memory**; they are not durable, multi-process logs.
 
