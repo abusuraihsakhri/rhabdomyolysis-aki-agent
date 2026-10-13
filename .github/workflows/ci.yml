@@ -1,4 +1,4 @@
-name: Rhabdomyolysis Aki Engine CI/CD & Security Verification
+name: Rhabdomyolysis AKI Python CI
 
 on:
   push:
