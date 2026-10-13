@@ -1,7 +1,7 @@
 """
 Clinical Data Models & Enums for RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent.
 Domain: Nephrology / Critical Care
-Standard: Peer-Reviewed Clinical Guidelines
+Standard: Illustrative rules; not clinically validated
 """
 import datetime
 from dataclasses import dataclass, field
@@ -43,7 +43,7 @@ class AgentAlert:
     title: str
     clinical_finding: str
     actionable_recommendation: str
-    guideline_citation: str = "Peer-Reviewed Clinical Guidelines"
+    guideline_citation: str = "Illustrative software rules (not clinical guidance)"
     timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:
