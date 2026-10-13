@@ -33,7 +33,7 @@ python cli.py verify-audit
 python simulator.py 100
 ```
 
-The main CLI is `cli.py` (the enterprise demonstration using Pydantic models). Batch CSV accepts either the enterprise `primary_metric` / `is_critical_flag` fields or the supplied sample's `metric_primary` / `is_stat` equivalents, including textual `True` and `False`. Audit records exist only in memory during execution; batch results are written to the specified CSV file; a separate `verify-audit` invocation starts a new process and therefore cannot verify a prior process's audit chain.
+The main CLI is `cli.py` (the enterprise demonstration using Pydantic models), also installed as `rhabdomyolysis-aki-engine`. Batch CSV accepts either the enterprise `primary_metric` / `is_critical_flag` fields or the supplied sample's `metric_primary` / `is_stat` equivalents, including textual `True` and `False`. Audit records exist only in memory during execution; batch results are written to the specified CSV file; a separate `verify-audit` invocation starts a new process and therefore cannot verify a prior process's audit chain.
 
 For compatibility, `rhabdo_guard.py` and `python -m rhabdomyolysis_aki_agent.cli` retain older, distinct example rule paths. Their fields and thresholds differ; they are not interchangeable with the main CLI.
 
