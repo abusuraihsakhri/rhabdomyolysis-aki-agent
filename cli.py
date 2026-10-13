@@ -4,17 +4,25 @@ Command Line Interface for Rhabdomyolysis Aki Agent.
 import argparse
 import csv
 import json
-import os
 import sys
-
-# Set default audit key for CLI if not already set
-os.environ.setdefault("AUDIT_SECRET_KEY", "cli-default-audit-key-change-in-production-2026")
 
 from agents.models import SystemTaskPayload
 from agents.supervisor import SystemSupervisor
 from agents.base import AuditLogger
 
 supervisor = SystemSupervisor(model_provider="mock")
+
+
+def parse_csv_bool(value):
+    """Parse CSV boolean representations without truthy-string errors."""
+    if isinstance(value, bool):
+        return value
+    normalized = str(value if value is not None else "").strip().lower()
+    if normalized in ("true", "1", "yes", "y", "on"):
+        return True
+    if normalized in ("false", "0", "no", "n", "off", ""):
+        return False
+    raise ValueError(f"Invalid CSV boolean: {value!r}")
 
 
 def main(argv=None):
@@ -61,7 +69,7 @@ def main(argv=None):
         dossier = supervisor.process_task(payload)
         print("=" * 80)
         print(f"  RHABDOMYOLYSIS AKI AGENT")
-        print(f"  Domain: Nephrology & Dialysis Systems | Standard: KDIGO / KDOQI Clinical Practice Guidelines")
+        print(f"  Domain: Rhabdomyolysis AKI software demo | Rules: illustrative, not clinically validated")
         print(f"  Dossier ID: {dossier.dossier_id} | Urgency: [{dossier.overall_urgency.value}]")
         print("=" * 80)
         for a in dossier.alerts:
@@ -90,16 +98,20 @@ def main(argv=None):
             fieldnames = list(reader.fieldnames or [])
             rows = list(reader)
 
-        out_fields = fieldnames + ["overall_urgency", "integrity_status", "total_alerts", "audit_hash"]
+        if not fieldnames:
+            raise ValueError("Input CSV must contain a header row")
+        if not ({"primary_metric", "metric_primary"} & set(fieldnames)):
+            raise ValueError("Input CSV must include primary_metric or metric_primary")
+        out_fields = list(dict.fromkeys(fieldnames + ["overall_urgency", "integrity_status", "total_alerts", "audit_hash"]))
         out_rows = []
         for r in rows:
             payload = SystemTaskPayload(
-                task_id=r.get("task_id", "TASK-01"),
-                target_identifier=r.get("target_identifier", "TARGET-01"),
-                primary_metric=float(r.get("primary_metric", 15.0)),
-                secondary_metric=float(r.get("secondary_metric", 5.0)),
-                status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=bool(r.get("is_critical_flag", False)),
+                task_id=r.get("task_id") or r.get("case_id") or "TASK-01",
+                target_identifier=r.get("target_identifier") or r.get("patient_synthetic_id") or "TARGET-01",
+                primary_metric=float(r.get("primary_metric") or r.get("metric_primary") or ""),
+                secondary_metric=float(r.get("secondary_metric") or r.get("metric_secondary") or 0),
+                status_descriptor=r.get("status_descriptor") or r.get("status_flag") or "NOMINAL",
+                is_critical_flag=parse_csv_bool(r.get("is_critical_flag", r.get("is_stat", False))),
             )
             dossier = supervisor.process_task(payload)
             row_dict = dict(r)

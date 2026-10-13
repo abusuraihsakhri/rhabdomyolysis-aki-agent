@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Rhabdomyolysis Aki Engine API",
-    "description": "Enterprise Distributed Component Platform (Clinical & Cryptographic AI) adhering to CAP / CLSI / NIST Standards.",
+    "title": "Rhabdomyolysis AKI demonstration API",
+    "description": "Generic illustrative rule checks only; not a validated McMahon, KDIGO or clinical scoring implementation.",
     "version": "3.0.0-ENTERPRISE",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
@@ -15,24 +15,24 @@
         "summary": "Health and metadata check",
         "responses": {
           "200": {
-            "description": "System optimal"
+            "description": "Service responds to health checks"
           }
         }
       }
     },
     "/metrics": {
       "get": {
-        "summary": "Prometheus operational metrics",
+        "summary": "Return in-memory JSON operational counters",
         "responses": {
           "200": {
-            "description": "Prometheus text metrics"
+            "description": "JSON count fields"
           }
         }
       }
     },
     "/api/audit": {
       "post": {
-        "summary": "Dispatch task payload across specialized workers",
+        "summary": "Evaluate illustrative unitless software rules",
         "requestBody": {
           "content": {
             "application/json": {
@@ -69,14 +69,14 @@
         },
         "responses": {
           "200": {
-            "description": "Consensus dossier with HMAC signature"
+            "description": "Synthetic demonstration dossier with signed audit-record hash"
           }
         }
       }
     },
     "/api/chat": {
       "post": {
-        "summary": "Air-gapped supervisory conversational assistant",
+        "summary": "Return deterministic mock demonstration text (not clinical advice)",
         "requestBody": {
           "content": {
             "application/json": {
@@ -103,12 +103,30 @@
     },
     "/api/audit/logs": {
       "get": {
-        "summary": "Retrieve and cryptographically verify HMAC audit trail",
+        "summary": "Read in-memory audit trail with independent audit-read token",
         "responses": {
           "200": {
             "description": "Cryptographic audit trail"
+          },
+          "403": {
+            "description": "Missing or invalid audit-read token"
           }
-        }
+        },
+        "security": [
+          {
+            "AuditReadToken": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "AuditReadToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Audit-Key",
+        "description": "Separate AUDIT_READ_TOKEN. Log-read endpoint disabled if unset."
       }
     }
   }

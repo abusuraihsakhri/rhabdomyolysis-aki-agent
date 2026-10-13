@@ -11,12 +11,23 @@ from .agents import RhabdoCoordinator
 coordinator = RhabdoCoordinator()
 
 
+def parse_csv_bool(value):
+    if isinstance(value, bool):
+        return value
+    normalized = str(value if value is not None else "").strip().lower()
+    if normalized in ("true", "1", "yes", "y", "on"):
+        return True
+    if normalized in ("false", "0", "no", "n", "off", ""):
+        return False
+    raise ValueError(f"Invalid CSV boolean: {value!r}")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="rhabdomyolysis-aki-agent", description="RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Audit
-    p_audit = subparsers.add_parser("audit", help="Run single case clinical audit")
+    p_audit = subparsers.add_parser("audit", help="Run illustrative example check")
     p_audit.add_argument("--case-id", default="CASE-2026-001")
     p_audit.add_argument("--primary", type=float, default=26.2)
     p_audit.add_argument("--secondary", type=float, default=12.5)
@@ -51,7 +62,7 @@ def main(argv=None):
         dossier = coordinator.process_case(case)
         print("=" * 80)
         print(f"  RHABDOGUARD: SERUM CREATINE KINASE (CK) KINETICS & MYOGLOBINURIA AKI AGENT")
-        print(f"  Domain: Nephrology / Critical Care | Standard: Peer-Reviewed Clinical Guidelines")
+        print(f"  Domain: Nephrology / Critical Care | Standard: Illustrative rules only (not clinically validated)")
         print(f"  Case: {dossier['case_id']} | Status: [{dossier['overall_status']}] | Total Alerts: {dossier['total_alerts']}")
         print("=" * 80)
         for a in dossier["alerts"]:
@@ -73,7 +84,9 @@ def main(argv=None):
             fieldnames = list(reader.fieldnames or [])
             rows = list(reader)
 
-        out_fields = fieldnames + ["overall_status", "total_alerts", "stat_critical_alerts", "consensus_summary"]
+        if not fieldnames or not ({"metric_primary", "primary_metric"} & set(fieldnames)):
+            raise ValueError("CSV header must include metric_primary or primary_metric")
+        out_fields = list(dict.fromkeys(fieldnames + ["overall_status", "total_alerts", "stat_critical_alerts", "consensus_summary"]))
         out_rows = []
         for r in rows:
             case = ClinicalCasePayload(
@@ -82,7 +95,7 @@ def main(argv=None):
                 primary_metric=float(r.get("metric_primary", r.get("primary_metric", 15.0))),
                 secondary_metric=float(r.get("metric_secondary", r.get("secondary_metric", 5.0))),
                 status_flag=r.get("status_flag", r.get("status_text", "NORMAL")),
-                is_stat=bool(r.get("is_stat", r.get("critical_flag", False))),
+                is_stat=parse_csv_bool(r.get("is_stat", r.get("critical_flag", False))),
             )
             dossier = coordinator.process_case(case)
             row_dict = dict(r)

@@ -93,7 +93,7 @@ class RhabdoCoordinator:
             "stat_critical_alerts": stat_count,
             "warning_alerts": warn_count,
             "alerts": [a.to_dict() for a in all_alerts],
-            "guideline_standard": "Peer-Reviewed Clinical Guidelines",
+            "guideline_standard": "Illustrative software rules (not clinically validated)",
             "consensus_summary": f"Multi-agent supervision completed across 3 sub-agents with status [{status.value}].",
         }
 
@@ -105,6 +105,6 @@ class RhabdoCoordinator:
         if "status" in q or "summary" in q:
             return f"RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent currently tracking {len(self.case_registry)} cases in on-premises memory."
         elif "guideline" in q or "standard" in q:
-            return "Active clinical surveillance operates under Peer-Reviewed Clinical Guidelines validated protocols."
+            return "Only illustrative checks are implemented; no validated clinical guideline assessment is available."
         else:
-            return f"RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent executive agent online. Zero-PHI air-gapped monitoring active."
+            return f"RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent demonstration coordinator available; identifier screening is limited and must not be considered complete PHI protection."

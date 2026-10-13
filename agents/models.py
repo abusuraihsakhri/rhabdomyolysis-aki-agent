@@ -1,7 +1,7 @@
 """
 Pydantic v2 schemas and data definitions for Rhabdomyolysis Aki Agent.
 Domain: Nephrology & Dialysis Systems
-Standard: KDIGO / KDOQI Clinical Practice Guidelines
+Standard: Illustrative software rules only; not clinically validated
 """
 import datetime
 from enum import Enum
@@ -58,7 +58,7 @@ class AgentAlert(BaseModel):
     summary: str
     technical_details: str
     actionable_remediation: str
-    standard_reference: str = "KDIGO / KDOQI Clinical Practice Guidelines"
+    standard_reference: str = "Illustrative software checks; no clinical validation"
     timestamp: str = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:
@@ -76,7 +76,7 @@ class ConsensusDossier(BaseModel):
     total_alerts: int
     critical_alerts_count: int
     alerts: List[AgentAlert]
-    standard_reference: str = "KDIGO / KDOQI Clinical Practice Guidelines"
+    standard_reference: str = "Illustrative software checks; no clinical validation"
     consensus_summary: str
     audit_hash: str
     timestamp: str = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())

@@ -1,5 +1,5 @@
 """
-Enterprise Security, PHI Outbound Guard, and HMAC-SHA256 Audit Trail.
+Regex-based identifier screening and HMAC-SHA256 in-memory audit trail.
 
 """
 import os
@@ -8,6 +8,7 @@ import json
 import time
 import hmac
 import hashlib
+from copy import deepcopy
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field
@@ -24,7 +25,7 @@ PHI_PATTERNS = [
 
 
 class SecurityException(Exception):
-    """Raised when outbound data violates HIPAA Safe Harbor or contains raw PHI."""
+    """Raised when input matches a limited identifier-detection pattern."""
     pass
 
 
@@ -91,14 +92,29 @@ class AuditTrail:
         return entry
 
     def verify_integrity(self) -> bool:
-        for i, entry in enumerate(self.logs):
-            prev = self.logs[i-1]["current_hash"] if i > 0 else "GENESIS_BLOCK_0000000000000000"
-            if entry["prev_hash"] != prev:
+        """Verify every signed record and the complete predecessor chain."""
+        previous = "GENESIS_BLOCK_0000000000000000"
+        for entry in self.logs:
+            try:
+                if not hmac.compare_digest(entry["prev_hash"], previous):
+                    return False
+                signed = "|".join(str(entry[field]) for field in (
+                    "audit_id", "timestamp", "actor", "actor_tier",
+                    "event_type", "payload_hash", "prev_hash"
+                ))
+                expected = hmac.new(
+                    self.secret_key, signed.encode("utf-8"), hashlib.sha256
+                ).hexdigest()
+                if not hmac.compare_digest(entry["current_hash"], expected):
+                    return False
+                previous = entry["current_hash"]
+            except (KeyError, TypeError, ValueError):
                 return False
         return True
 
     def get_trail(self) -> List[Dict[str, Any]]:
-        return self.logs
+        """Return a snapshot; callers cannot mutate the underlying audit chain."""
+        return deepcopy(self.logs)
 
 
 _AUDIT_INSTANCE: Optional[AuditTrail] = None
