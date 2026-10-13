@@ -10,11 +10,11 @@ coordinator = RhabdoCoordinator()
 def create_app():
     try:
         from fastapi import FastAPI
-        from pydantic import BaseModel
+        from pydantic import BaseModel, Field
 
         app = FastAPI(
             title="RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent",
-            description="Calculates McMahon rhabdomyolysis risk score for renal replacement therapy and manages target urine output (>200-300 mL/h) and alkalinization.",
+            description="Illustrative threshold checks only; not validated clinical risk assessment.",
             version="2.0.0-PRO",
         )
 
@@ -26,7 +26,7 @@ def create_app():
             status_flag: str = "DISCORDANT"
             is_stat: bool = True
             clinical_notes: str = ""
-            biomarkers: Dict[str, Any] = {}
+            biomarkers: Dict[str, Any] = Field(default_factory=dict)
 
         class ChatRequest(BaseModel):
             query: str
