@@ -15,7 +15,7 @@ def create_app():
         app = FastAPI(
             title="RhabdoGuard: Serum Creatine Kinase (CK) Kinetics & Myoglobinuria AKI Agent",
             description="Illustrative threshold checks only; not validated clinical risk assessment.",
-            version="2.0.0-PRO",
+            version="2.0.0",
         )
 
         class AuditRequest(BaseModel):
